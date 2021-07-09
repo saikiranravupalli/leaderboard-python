@@ -1,5 +1,7 @@
 from __future__ import division
 
+import json
+
 from redis import StrictRedis, Redis, ConnectionPool
 import math
 import sys
@@ -136,10 +138,13 @@ class Leaderboard(object):
         '''
         pipeline = self.redis_connection.pipeline()
         if isinstance(self.redis_connection, Redis):
-            pipeline.zadd(leaderboard_name, member, score)
+            pipeline.zadd(leaderboard_name, {member: score})
         else:
-            pipeline.zadd(leaderboard_name, score, member)
+            pipeline.zadd(leaderboard_name, {score: member})
+
         if member_data:
+            if not isinstance(member_data, str):
+                member_data = json.dumps(member_data)
             pipeline.hset(
                 self._member_data_key(leaderboard_name),
                 member,
@@ -159,14 +164,19 @@ class Leaderboard(object):
         pipeline = self.redis_connection.pipeline()
         for leaderboard_name in leaderboards:
             if isinstance(self.redis_connection, Redis):
-                pipeline.zadd(leaderboard_name, member, score)
+                pipeline.zadd(leaderboard_name, {member: score})
             else:
-                pipeline.zadd(leaderboard_name, score, member)
+                pipeline.zadd(leaderboard_name, {score: member})
+
             if member_data:
+                if not isinstance(member_data, str):
+                    member_data = json.dumps(member_data)
+
                 pipeline.hset(
                     self._member_data_key(leaderboard_name),
                     member,
                     member_data)
+
         pipeline.execute()
 
     def rank_member_if(
@@ -241,9 +251,9 @@ class Leaderboard(object):
         pipeline = self.redis_connection.pipeline()
         for member, score in grouper(2, members_and_scores):
             if isinstance(self.redis_connection, Redis):
-                pipeline.zadd(leaderboard_name, member, score)
+                pipeline.zadd(leaderboard_name, {member: score})
             else:
-                pipeline.zadd(leaderboard_name, score, member)
+                pipeline.zadd(leaderboard_name, {score: member})
         pipeline.execute()
 
     def member_data_for(self, member):
@@ -303,6 +313,10 @@ class Leaderboard(object):
         @param member [String] Member name.
         @param member_data [String] Optional member data.
         '''
+        if member_data:
+            if not isinstance(member_data, str):
+                member_data = json.dumps(member_data)
+
         self.redis_connection.hset(
             self._member_data_key(leaderboard_name),
             member,
@@ -546,7 +560,7 @@ class Leaderboard(object):
         @param member_data [String] Optional member data.
         '''
         pipeline = self.redis_connection.pipeline()
-        pipeline.zincrby(leaderboard_name, member, delta)
+        pipeline.zincrby(leaderboard_name, delta, member)
         if member_data:
             pipeline.hset(
                 self._member_data_key(leaderboard_name),

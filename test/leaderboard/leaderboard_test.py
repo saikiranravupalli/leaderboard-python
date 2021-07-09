@@ -59,13 +59,13 @@ class LeaderboardTest(unittest.TestCase):
     def test_member_data_for(self):
         self.__rank_members_in_leaderboard()
         self.leaderboard.member_data_for('member_1').should.eql(
-            str({'member_name': 'Leaderboard member 1'}))
+            '{"member_name": "Leaderboard member 1"}')
 
     def test_members_data_for(self):
         self.__rank_members_in_leaderboard()
         members_data = self.leaderboard.members_data_for(['member_1', 'member_3'])
-        members_data[0].should.eql(str({'member_name': 'Leaderboard member 1'}))
-        members_data[1].should.eql(str({'member_name': 'Leaderboard member 3'}))
+        members_data[0].should.eql('{"member_name": "Leaderboard member 1"}')
+        members_data[1].should.eql('{"member_name": "Leaderboard member 3"}')
 
     def test_update_member_data(self):
         self.__rank_members_in_leaderboard()
@@ -73,7 +73,7 @@ class LeaderboardTest(unittest.TestCase):
             'member_1', {
                 'member_name': 'Updated Leaderboard member 1'})
         self.leaderboard.member_data_for('member_1').should.eql(
-            str({'member_name': 'Updated Leaderboard member 1'}))
+            '{"member_name": "Updated Leaderboard member 1"}')
 
     def test_remove_member_data(self):
         self.__rank_members_in_leaderboard()
@@ -276,7 +276,7 @@ class LeaderboardTest(unittest.TestCase):
         len(leaders).should.equal(5)
         leaders[0]['member'].should.equal('member_5')
         leaders[0]['member_data'].should.equal(
-            str({'member_name': 'Leaderboard member 5'}))
+            '{"member_name": "Leaderboard member 5"}')
 
     def test_leaders_return_type(self):
         leaders = self.leaderboard.leaders(1)
@@ -373,7 +373,7 @@ class LeaderboardTest(unittest.TestCase):
         self.leaderboard.member_at(50)['rank'].should.equal(50)
         self.leaderboard.member_at(51).should.equal(None)
         self.leaderboard.member_at(1, with_member_data=True)['member_data'].should.eql(
-            str({'member_name': 'Leaderboard member 50'}))
+            '{"member_name": "Leaderboard member 50"}')
         self.leaderboard.member_at(-5).should.equal(None)
 
     def test_around_me(self):
@@ -515,7 +515,7 @@ class LeaderboardTest(unittest.TestCase):
         leaders[0]['score_custom'].should.equal(25.0)
         leaders[0]['rank_custom'].should.equal(1)
         leaders[0]['member_data_custom'].should.equal(
-            "{'member_name': 'Leaderboard member 25'}")
+            '{"member_name": "Leaderboard member 25"}')
 
     def test_can_use_StrictRedis_class_for_connection(self):
         lb = Leaderboard('lb1', connection=StrictRedis(db=0))
